@@ -1,0 +1,10 @@
+﻿;valor
+mcnemar_GBxSVM;1.0
+mcnemar_GBxRF;0.5413
+mcnemar_RFxLR;0.7283
+pareado_t;0.6493
+pareado_p;0.5516
+IC95_Regressão Logística;"[0.691 ; 0.816]"
+IC95_Random Forest;"[0.704 ; 0.828]"
+IC95_Gradient Boosting;"[0.726 ; 0.845]"
+IC95_SVM;"[0.718 ; 0.841]"

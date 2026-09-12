@@ -1,0 +1,512 @@
+================================================================================
+MANUAL COMPLETO: CONFIGURAÇÃO DE AMBIENTE PYTHON
+POSTECH DTAT TECH CHALLENGE
+================================================================================
+
+Última atualização: 13 de junho de 2026
+Versão: 1.0
+Público: Efraim Oliveira, Érica Tarsis, Ricardo Moraes, Rodrigo Bernardino, Thiago Galvão
+
+================================================================================
+ÍNDICE
+================================================================================
+
+1. Premissas e Problemas Resolvidos
+2. Configuração macOS (M4 e Intel)
+3. Configuração Windows
+4. Configuração VS Code
+5. Governança e Reproducibilidade
+
+================================================================================
+1. PREMISSAS E PROBLEMAS RESOLVIDOS
+================================================================================
+
+Lei de Murphy em Ação
+---------------------
+
+Preparamo-nos para o pior. Documentamos todos os problemas encontrados 
+e suas soluções:
+
+┌─────────────────────────────────────┬──────────────────────────────────┐
+│ PROBLEMA                            │ CAUSA RAIZ                       │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│ pandas==3.0.2 not found             │ Versão não existe; Python < 3.10 │
+│ SOLUÇÃO: Usar pandas 2.2.3          │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│ numpy==2.4.4 not found              │ NumPy 2.4.4 exige Python ≥3.12  │
+│ SOLUÇÃO: Instalar NumPy 2.0.2       │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│ Python 3.9 ativado apesar de        │ /usr/bin/python3 aponta para     │
+│ 3.12 instalado                      │ sistema                          │
+│ SOLUÇÃO: Usar alias ou venv         │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│ error: externally-managed-          │ Proteção do Homebrew             │
+│ environment                         │                                  │
+│ SOLUÇÃO: Usar ambiente virtual venv │                                  │
+├─────────────────────────────────────┼──────────────────────────────────┤
+│ Jupyter não reconhece venv no       │ Kernel não selecionado           │
+│ VS Code                             │ corretamente                     │
+│ SOLUÇÃO: Selecionar kernel manualmente│                               │
+└─────────────────────────────────────┴──────────────────────────────────┘
+
+Lei de Kidlin: Ambiguidade = Perguntar
+--------------------------------------
+
+Quando não temos informações completas, perguntamos antes de agir.
+Este manual incorpora:
+
+✓ Verificações em cada passo
+✓ Confirmações visuais esperadas
+✓ Checklist para validação
+
+Lei de Gilbert: Simplicidade Antes de Executar
+----------------------------------------------
+
+Cada seção explica:
+1. O que fazer (passo técnico)
+2. Por que fazer (contexto para leigos)
+3. Como verificar (validação)
+4. Exemplos visuais (outputs esperados)
+
+================================================================================
+2. CONFIGURAÇÃO macOS (M4 e Intel)
+================================================================================
+
+Versões Testadas e Validadas
+-----------------------------
+
+┌──────────────────────────────────────────────────────────────┐
+│ Componente          │ Versão           │ Compatibilidade     │
+├─────────────────────┼──────────────────┼─────────────────────┤
+│ macOS               │ 13.x - 15.x      │ ✓ Testado          │
+│ Python              │ 3.12.13          │ ✓ Recomendado      │
+│ Homebrew            │ 4.x+             │ ✓ Obrigatório      │
+│ pandas              │ 2.2.3            │ ✓ Testado          │
+│ numpy               │ 2.0.2 ou 2.4.4   │ ✓ Compatível       │
+│ scikit-learn        │ 1.5.0+           │ ✓ Testado          │
+└──────────────────────────────────────────────────────────────┘
+
+PASSO 1: INSTALAR HOMEBREW
+----------------------------
+
+O que é: Gerenciador de pacotes para macOS (como "App Store" para 
+         desenvolvedores)
+
+Execute:
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+O que esperar:
+  - Pedirá sua senha do Mac → digite e pressione Enter
+  - Mensagens verdes com ✓ ao final
+  - Levará ~5-10 minutos
+
+Verifique:
+  brew --version
+
+Output esperado:
+  Homebrew 4.x.x (ou superior)
+
+
+PASSO 2: CONFIGURAR PATH DO HOMEBREW
+-------------------------------------
+
+O que é: PATH é a "lista de caminhos" onde o Mac procura programas
+
+Execute:
+  echo >> /Users/$USER/.zprofile
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/$USER/.zprofile
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+
+Recarregue:
+  source ~/.zprofile
+
+Verifique:
+  brew --version
+
+Output esperado:
+  Homebrew 4.x.x
+
+
+PASSO 3: INSTALAR PYTHON 3.12
+------------------------------
+
+O que é: Python é a linguagem de programação que usamos
+
+Execute:
+  brew install python@3.12
+
+O que esperar:
+  - Levará ~5 minutos
+  - Compila para Mac M4 (ARM64) ou Intel automaticamente
+
+Verifique:
+  /opt/homebrew/bin/python3.12 --version
+
+Output esperado:
+  Python 3.12.13
+
+
+PASSO 4: CRIAR ALIAS (CRÍTICO!)
+--------------------------------
+
+O que é: Alias é um "atalho" para comandos longos
+
+Edite o arquivo de configuração:
+  nano ~/.zshrc
+
+Adicione estas linhas no FINAL do arquivo:
+
+  # Python 3.12 via Homebrew
+  export PATH="/opt/homebrew/opt/python@3.12/libexec/bin:$PATH"
+  alias python='/opt/homebrew/bin/python3.12'
+  alias python3='/opt/homebrew/bin/python3.12'
+  alias pip='/opt/homebrew/bin/pip3.12'
+
+Como salvar em nano:
+  1. Pressione Ctrl + O
+  2. Pressione Enter
+  3. Pressione Ctrl + X
+
+Recarregue:
+  source ~/.zshrc
+
+Verifique (FECHE E ABRA TERMINAL NOVO):
+  python --version
+  python3 --version
+  pip --version
+
+Output esperado:
+  Python 3.12.13
+  Python 3.12.13
+  pip 24.x.x
+
+
+PASSO 5: CRIAR AMBIENTE VIRTUAL
+--------------------------------
+
+O que é: Ambiente virtual é uma "cópia isolada" do Python para seu projeto
+
+Navegue para o projeto:
+  cd /Users/seu_usuario/Documents/TechChallenge2/Notebook
+
+Crie o venv:
+  python -m venv venv
+
+Ative:
+  source venv/bin/activate
+
+Verifique (você deve ver "(venv)" no prompt):
+  which python
+  python --version
+
+Output esperado:
+  /Users/seu_usuario/Documents/TechChallenge2/Notebook/venv/bin/python
+  Python 3.12.13
+
+
+PASSO 6: INSTALAR DEPENDÊNCIAS
+-------------------------------
+
+Com o venv ativado ("(venv)" no prompt):
+
+  pip install --upgrade pip
+  
+  pip install pandas==2.2.3 numpy==2.0.2 scikit-learn matplotlib openpyxl jupyter
+
+Verifique:
+  pip list | grep -E "pandas|numpy|scikit-learn"
+
+Output esperado:
+  numpy                     2.0.2
+  pandas                    2.2.3
+  scikit-learn              1.5.0 (ou superior)
+
+
+PASSO 7: SALVAR REQUIREMENTS.TXT
+--------------------------------
+
+Isso garante que todos da equipe usem as MESMAS versões:
+
+  pip freeze > requirements.txt
+
+Verifique o arquivo:
+  cat requirements.txt
+
+Deve conter:
+  pandas==2.2.3
+  numpy==2.0.2
+  scikit-learn>=1.5.0
+  matplotlib
+  openpyxl
+  jupyter
+  ...
+
+================================================================================
+3. CONFIGURAÇÃO WINDOWS
+================================================================================
+
+Versões Testadas e Validadas
+-----------------------------
+
+┌──────────────────────────────────────────────────────────────┐
+│ Componente          │ Versão           │ Compatibilidade     │
+├─────────────────────┼──────────────────┼─────────────────────┤
+│ Windows             │ 10 / 11          │ ✓ Testado          │
+│ Python              │ 3.12.x           │ ✓ Recomendado      │
+│ pip                 │ 24.x+            │ ✓ Obrigatório      │
+│ pandas              │ 2.2.3            │ ✓ Testado          │
+│ numpy               │ 2.0.2 ou 2.4.4   │ ✓ Compatível       │
+└──────────────────────────────────────────────────────────────┘
+
+PASSO 1: INSTALAR PYTHON 3.12
+------------------------------
+
+Baixe:
+  - Acesse https://www.python.org/downloads/
+  - Clique em "Download Python 3.12.x"
+
+Instale:
+  1. Execute o .exe
+  2. IMPORTANTE: Marque a caixa "Add Python to PATH"
+  3. Clique em "Install Now"
+  4. Aguarde conclusão
+
+Verifique:
+Abra PowerShell ou cmd e execute:
+  python --version
+
+Output esperado:
+  Python 3.12.x
+
+
+PASSO 2: CRIAR AMBIENTE VIRTUAL
+--------------------------------
+
+Navegue para o projeto:
+  cd C:\Users\seu_usuario\Documents\TechChallenge2\Notebook
+
+Crie o venv:
+  python -m venv venv
+
+Ative (Windows):
+  venv\Scripts\activate
+
+Verifique (você deve ver "(venv)" no prompt):
+  python --version
+
+Output esperado:
+  (venv) C:\Users\seu_usuario\...\Notebook> python --version
+  Python 3.12.x
+
+
+PASSO 3: INSTALAR DEPENDÊNCIAS
+-------------------------------
+
+Com o venv ativado:
+
+  pip install --upgrade pip
+  
+  pip install pandas==2.2.3 numpy==2.0.2 scikit-learn matplotlib openpyxl jupyter
+
+Verifique:
+  pip list | findstr pandas
+
+Output esperado:
+  pandas                    2.2.3
+  numpy                     2.0.2
+
+
+PASSO 4: SALVAR REQUIREMENTS.TXT
+--------------------------------
+
+  pip freeze > requirements.txt
+
+================================================================================
+4. CONFIGURAÇÃO VS CODE
+================================================================================
+
+Versão Testada: VS Code 1.90.x+
+
+PASSO 1: INSTALAR EXTENSÕES OBRIGATÓRIAS
+-----------------------------------------
+
+1. Abra VS Code
+2. Clique em Extensions (ícone de quadrado no lado esquerdo)
+3. Procure e instale (em ordem):
+
+┌─────────────────────────────┬────────────┬──────────────────────────┐
+│ Extensão                    │ Autor      │ Por quê                  │
+├─────────────────────────────┼────────────┼──────────────────────────┤
+│ Python                      │ Microsoft  │ Suporte básico a Python  │
+│ Jupyter                     │ Microsoft  │ Suporte a notebooks      │
+│ Pylance                     │ Microsoft  │ Autocompletar e dicas    │
+│ Python Docstring Generator  │ Nils Werner│ Gerar docstrings         │
+└─────────────────────────────┴────────────┴──────────────────────────┘
+
+
+PASSO 2: ABRIR PROJETO CORRETAMENTE
+------------------------------------
+
+CRÍTICO: Abra a pasta correta!
+
+macOS:
+  cd /Users/seu_usuario/Documents/TechChallenge2/Notebook
+  code .
+
+Windows:
+  cd C:\Users\seu_usuario\Documents\TechChallenge2\Notebook
+  code .
+
+O "code ." abre a pasta atual no VS Code
+
+
+PASSO 3: SELECIONAR KERNEL DO VENV
+-----------------------------------
+
+Dentro do VS Code:
+
+1. Abra qualquer arquivo .ipynb (Jupyter Notebook)
+2. Clique no botão azul "Select Kernel" (canto superior direito)
+3. Clique em "Python Environments..."
+4. Procure por opção com "venv"
+
+Se não aparecer:
+  1. Clique em "Enter interpreter path..."
+  2. Cole o caminho correto:
+
+macOS:
+  /Users/seu_usuario/Documents/TechChallenge2/Notebook/venv/bin/python
+
+Windows:
+  C:\Users\seu_usuario\Documents\TechChallenge2\Notebook\venv\Scripts\python.exe
+
+  3. Pressione Enter
+
+Verifique:
+O botão azul agora deve mostrar algo como:
+  ./venv/bin/python ou venv
+
+
+PASSO 4: ATIVAR VENV NO TERMINAL INTEGRADO
+-------------------------------------------
+
+Abra terminal no VS Code:
+  - Terminal → New Terminal ou Ctrl + `
+
+macOS:
+  source venv/bin/activate
+
+Windows:
+  venv\Scripts\activate
+
+Verifique (deve aparecer "(venv)" no prompt):
+  python --version
+
+
+PASSO 5: TESTAR INSTALAÇÃO
+---------------------------
+
+Crie uma célula de teste no notebook:
+
+  import sys
+  import pandas
+  import numpy
+  import sklearn
+
+  print(f"Python: {sys.version}")
+  print(f"Executable: {sys.executable}")
+  print(f"Pandas: {pandas.__version__}")
+  print(f"NumPy: {numpy.__version__}")
+  print(f"Scikit-learn: {sklearn.__version__}")
+
+Execute: Shift + Enter ou clique em play
+
+Output esperado:
+  Python: 3.12.13 ...
+  Executable: /Users/seu_usuario/.../venv/bin/python
+  Pandas: 2.2.3
+  NumPy: 2.0.2
+  Scikit-learn: 1.5.0+
+
+✓ Se aparecer isso, tudo está 100% correto!
+
+================================================================================
+5. GOVERNANÇA E REPRODUCIBILIDADE
+================================================================================
+
+Princípio Fundamental
+---------------------
+
+QUALQUER MEMBRO DA EQUIPE DEVE CONSEGUIR EXECUTAR O PROJETO EM QUALQUER
+MÁQUINA EM MENOS DE 5 MINUTOS.
+
+
+CHECKLIST DE REPRODUCIBILIDADE
+-------------------------------
+
+Antes de compartilhar o projeto:
+
+1. Documentar versão do Python
+   python --version > docs/python_version.txt
+
+2. Congelar dependências
+   pip freeze > requirements.txt
+
+3. Testar instalação em venv novo
+   rm -rf venv_test
+   python -m venv venv_test
+   source venv_test/bin/activate
+   pip install -r requirements.txt
+
+4. Executar notebook end-to-end
+   jupyter nbconvert --execute --inplace seu_notebook.ipynb
+
+
+ARQUIVO README.MD NO PROJETO
+----------------------------
+
+# TechChallenge Fase 2 - Wine Quality
+
+## Setup Rápido
+
+### macOS
+```bash
+cd path/to/TechChallenge2/Notebook
+source venv/bin/activate
+pip install -r requirements.txt
+code .
+```
+
+### Windows
+```bash
+cd path\to\TechChallenge2\Notebook
+venv\Scripts\activate
+pip install -r requirements.txt
+code .
+```
+
+## Verificar Instalação
+
+```python
+python --version  # Deve ser 3.12.13
+pip list | grep pandas  # Deve ser 2.2.3
+```
+
+## Integrantes (ordem alfabética)
+- Efraim Oliveira
+- Érica Tarsis
+- Ricardo Moraes
+- Rodrigo Bernardino
+- Thiago Galvão
+
+================================================================================
+INFORMAÇÕES FINAIS
+================================================================================
+
+Documento preparado por: Ricardo Moraes
+Data: 13 de junho de 2026
+Status: ✓ Aprovado para uso em produção
+
+================================================================================
+FIM DO MANUAL
+================================================================================

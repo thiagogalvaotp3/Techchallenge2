@@ -1,0 +1,8 @@
+﻿;F1_medio;desvio
+Random Forest;0,7623;0,0148
+Gradient Boosting;0,7555;0,0172
+Regressão Logística;0,7547;0,0212
+Naive Bayes;0,7502;0,0197
+SVM;0,7488;0,0215
+KNN;0,722;0,0293
+Árvore de Decisão;0,6882;0,0203
